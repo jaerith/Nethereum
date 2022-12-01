@@ -59,6 +59,56 @@ namespace Nethereum.ABI.Encoders
             return EncodeInt(new BigInteger(value));
         }
 
+        public static byte[] EncodeSignedUnsigned256(BigInteger value, uint numberOfBytesArray)
+        {
+            if (value <= (IntType.MAX_UINT256_VALUE*-1))
+            {
+                value = 1 + IntType.MAX_UINT256_VALUE + (value);
+            }
+
+            //It should always be Big Endian.
+            var bytes = BitConverter.IsLittleEndian
+                ? value.ToByteArray().Reverse().ToArray()
+                : value.ToByteArray();
+
+
+            if (bytes.Length == 33 && value.Sign > 0)
+            {
+                if (bytes[0] == 0x00)
+                {
+                    bytes = bytes.Skip(1).ToArray();
+                }
+            }
+            else
+            {
+                if(bytes.Length > 32 && value < 0)
+                {
+                    value = 1 + IntType.MAX_UINT256_VALUE + (value);
+                    return EncodeSignedUnsigned256(value, numberOfBytesArray);
+                }
+                else
+                {
+                    if(bytes.Length > 32)
+                    {
+                        throw new OverflowException();
+                    }
+                }
+            }
+
+            var ret = new byte[numberOfBytesArray];
+
+            for (var i = 0; i < ret.Length; i++)
+                if (value.Sign < 0)
+                    ret[i] = 0xFF;
+                else
+                    ret[i] = 0;
+
+            Array.Copy(bytes, 0, ret, (int)numberOfBytesArray - bytes.Length, bytes.Length);
+
+            return ret;
+        }
+
+
         public byte[] EncodeInt(BigInteger value, uint numberOfBytesArray, bool validate = true, bool overflowToDefault = false)
         {
             if (validate)

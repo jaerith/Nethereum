@@ -24,6 +24,7 @@ using System.Linq;
 using Nethereum.EVM;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Hex.HexTypes;
+using Nethereum.EVM.BlockchainState;
 
 namespace Nethereum.Contracts.IntegrationTests.EVM.WalletForwarderTests
 {
@@ -72,13 +73,14 @@ namespace Nethereum.Contracts.IntegrationTests.EVM.WalletForwarderTests
 
             var callInput = cloneForwarderFunction.CreateCallInput(factoryAddress);
             callInput.From = EthereumClientIntegrationFixture.AccountAddress;
+            callInput.ChainId = new HexBigInteger(EthereumClientIntegrationFixture.ChainId);
 
             var nodeDataService = new RpcNodeDataService(web3.Eth, new BlockParameter(blockNumber));
             var executionStateService = new ExecutionStateService(nodeDataService);
             var programContext = new ProgramContext(callInput, executionStateService);
             var program = new Program(factoryServiceCode.HexToByteArray(), programContext);
             var evmSimulator = new EVMSimulator();
-            await evmSimulator.ExecuteAsync(program, 0, false);
+            await evmSimulator.ExecuteAsync(program, 0, 0, false);
 
             //var txnReceipt = await factoryService.CloneForwarderRequestAndWaitForReceiptAsync(defaultForwaderContractAddress, salt);
             //var clonedAddress = txnReceipt.DecodeAllEvents<ForwarderClonedEventDTO>()[0].Event.ClonedAdress;
@@ -96,7 +98,7 @@ namespace Nethereum.Contracts.IntegrationTests.EVM.WalletForwarderTests
             programContext = new ProgramContext(destinationCallInput, executionStateService);
             var newCode = await executionStateService.GetCodeAsync(contractCalculatedAddress);
             program = new Program(newCode, programContext);
-            await evmSimulator.ExecuteAsync(program, 0, false);
+            await evmSimulator.ExecuteAsync(program, 0, 0, false);
 
             var destinationInContractCloned = new DestinationOutputDTO().DecodeOutput(program.ProgramResult.Result.ToHex()).ReturnValue1;
 
