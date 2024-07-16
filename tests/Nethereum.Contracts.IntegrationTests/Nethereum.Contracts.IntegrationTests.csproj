@@ -3,12 +3,15 @@
   <PropertyGroup>
     <Description>Nethereum.Contracts.IntegrationTests </Description>
     <Authors>Juan Blanco</Authors>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+	 <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
+	  <ProjectReference Include="..\..\src\Nethereum.EVM.Contracts\Nethereum.EVM.Contracts.csproj" />
 	  <ProjectReference Include="..\..\src\Nethereum.EVM\Nethereum.EVM.csproj" />
+	  <ProjectReference Include="..\..\src\Nethereum.Merkle.Patricia\Nethereum.Merkle.Patricia.csproj" />
 	  <ProjectReference Include="..\..\src\Nethereum.Merkle\Nethereum.Merkle.csproj" />
+	  <ProjectReference Include="..\..\src\Nethereum.RPC.Extensions\Nethereum.RPC.Extensions.csproj" />
 	  <ProjectReference Include="..\..\src\Nethereum.Web3\Nethereum.Web3.csproj" />
     <ProjectReference Include="..\..\src\Nethereum.Geth\Nethereum.Geth.csproj" />
     <ProjectReference Include="..\Nethereum.XUnitEthereumClients\Nethereum.XUnitEthereumClients.csproj" />
@@ -27,9 +30,12 @@
 	  <PackageReference Include="IPLD.ContentIdentifier" Version="1.1.1" />
 	  <PackageReference Include="Multiformats.Codec" Version="1.1.2" />
 	  <PackageReference Include="Multiformats.Hash" Version="1.5.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+    <PackageReference Include="xunit" Version="2.4.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta4-build3742" />
   </ItemGroup>
   

@@ -15,17 +15,22 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net8.0;net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 	
 <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'netstandard1.1' AND '$(TargetFramework)' != 'net451' AND '$(TargetFramework)' != 'netcoreapp2.1' ">
-	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[6.0.1,9)" />
 </ItemGroup>
+
+
+	
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);LITE;BYTECODELITE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
+
+    <PackageReference Include="ADRaffy.ENSNormalize" Version="0.1.5" />
 
     <PackageReference Include="Common.Logging.Core">
       <Version>3.4.1</Version>
@@ -84,5 +89,12 @@
 		  <Link>Siwe.Core\%(RecursiveDir)%(FileName)%(Extension)</Link>
 	  </Compile>
 
+	  <Compile Include="..\..\src\Nethereum.Merkle\**\*.cs" Exclude="..\..\src\Nethereum.Merkle\Properties\**;..\..\src\Nethereum.Merkle\bin\**;..\..\src\Nethereum.Merkle\obj\**">
+		  <Link>Merkle\%(RecursiveDir)%(FileName)%(Extension)</Link>
+	  </Compile>
+
+	  <Compile Include="..\..\src\Nethereum.Merkle.Patricia\**\*.cs" Exclude="..\..\src\Nethereum.Merkle.Patricia\Properties\**;..\..\src\Nethereum.Merkle.Patricia\bin\**;..\..\src\Nethereum.Merkle.Patricia\obj\**">
+		  <Link>Merkle.Patricia\%(RecursiveDir)%(FileName)%(Extension)</Link>
+	  </Compile>
 </ItemGroup>
 </Project>

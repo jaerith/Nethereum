@@ -8,6 +8,8 @@ using Nethereum.ABI;
 using Nethereum.ABI.FunctionEncoding;
 using Nethereum.Util;
 using System.Collections;
+using System.Numerics;
+using System;
 
 namespace Nethereum.ABI.EIP712
 {
@@ -88,6 +90,38 @@ namespace Nethereum.ABI.EIP712
                 var result = memoryStream.ToArray();
                 return result;
             }
+        }
+
+        public byte[] HashDomainSeparator<TDomain>(TypedData<TDomain> typedData)
+        {
+            typedData.EnsureDomainRawValuesAreInitialised();
+            using (var memoryStream = new MemoryStream())
+            using (var writer = new BinaryWriter(memoryStream))
+            {
+                writer.Write(HashStruct(typedData.Types, "EIP712Domain", typedData.DomainRawValues));
+                writer.Flush();
+                var result = memoryStream.ToArray();
+                return result;
+            }
+        }
+
+        public byte[] HashStruct<T>(T message, string primaryType, params Type[] types)
+        {
+            var memberDescriptions = MemberDescriptionFactory.GetTypesMemberDescription(types);
+            var memberValue = MemberValueFactory.CreateFromMessage(message);
+            return HashStruct(memberDescriptions, primaryType, memberValue);
+        }
+
+        public string GetEncodedType(string primaryType, params Type[] types)
+        {
+            var memberDescriptions = MemberDescriptionFactory.GetTypesMemberDescription(types);
+            return EncodeType(memberDescriptions, primaryType);
+        }
+
+        public string GetEncodedTypeDomainSeparator<TDomain>(TypedData<TDomain> typedData)
+        {
+            typedData.EnsureDomainRawValuesAreInitialised();
+            return EncodeType(typedData.Types, "EIP712Domain");
         }
 
         private byte[] HashStruct(IDictionary<string, MemberDescription[]> types, string primaryType, IEnumerable<MemberValue> message)
@@ -214,6 +248,29 @@ namespace Nethereum.ABI.EIP712
                                     writer.Write(Sha3Keccack.Current.CalculateHash(memoryStream.ToArray()));
                                 }
 
+                            }
+                            else if(memberValue.TypeName.StartsWith("int") || memberValue.TypeName.StartsWith("uint"))
+                            {
+                                object value;
+                                if (memberValue.Value is string)
+                                {
+                                    BigInteger parsedOutput;
+                                    if(BigInteger.TryParse((string)memberValue.Value, out parsedOutput))
+                                    {
+                                        value = parsedOutput;
+                                    }
+                                    else
+                                    {
+                                        value = memberValue.Value;
+                                    }
+                                }
+                                else
+                                {
+                                    value = memberValue.Value;
+                                }
+                                var abiValue = new ABIValue(memberValue.TypeName, value);
+                                var abiValueEncoded = _abiEncode.GetABIEncoded(abiValue);
+                                writer.Write(abiValueEncoded);
                             }
                             else
                             {

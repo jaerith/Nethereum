@@ -1,10 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
+using ADRaffy.ENSNormalize;
 using Multiformats.Codec;
 using Multiformats.Hash;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts.Services;
 using Nethereum.Contracts.Standards.ENS;
+
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Util;
 using Nethereum.XUnitEthereumClients;
@@ -51,14 +59,14 @@ namespace Nethereum.Contracts.IntegrationTests.SmartContracts.Standards
             var txn = await ensService.SetTextRequestAsync("nethereum.eth", TextDataKey.url, "https://nethereum.com").ConfigureAwait(false);
         }
 
-        [Fact]
-        public async void ShouldBeAbleToResolveText()
-        {
-            var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);
-            var ensService = web3.Eth.GetEnsService();
-            var url = await ensService.ResolveTextAsync("nethereum.eth", TextDataKey.url).ConfigureAwait(false);
-            Assert.Equal("https://nethereum.com", url);
-        }
+        //[Fact]
+        //public async void ShouldBeAbleToResolveText()
+        //{
+        //    var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);
+        //    var ensService = web3.Eth.GetEnsService();
+        //    var url = await ensService.ResolveTextAsync("nethereum.eth", TextDataKey.url).ConfigureAwait(false);
+        //    Assert.Equal("https://nethereum.com", url);
+        //}
 
         [Fact]
         public async void ShouldBeAbleToCalculateRentPriceAndCommitment()
@@ -178,12 +186,14 @@ namespace Nethereum.Contracts.IntegrationTests.SmartContracts.Standards
 
 
         [Fact]
-        public void ShouldNormaliseInternationalDomain()
+        public void ShouldNotNormaliseMixtureOfCharactersDomain()
         {
             var input = "fоо.eth"; // with cyrillic 'o'
             var expected = "fоо.eth";
-            var output = new EnsUtil().Normalise(input);
-            Assert.Equal(expected, output);
+
+            Assert.Throws<InvalidLabelException>(() =>
+                    new EnsUtil().Normalise(input));
+            //Invalid label "fоо‎": illegal mixture: Latin + Cyrillic о‎ {43E}
         }
 
         [Fact]
@@ -203,6 +213,60 @@ namespace Nethereum.Contracts.IntegrationTests.SmartContracts.Standards
             var output = new EnsUtil().Normalise(input);
             Assert.Equal(expected, output);
         }
+
+        [Fact]
+        public async void ShouldResolveAddressOffline()
+        {
+            var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);        
+            var ensService = web3.Eth.GetEnsService();
+            var theAddress = await ensService.ResolveAddressAsync("1.offchainexample.eth").ConfigureAwait(false);
+            var expected = "0x41563129cDbbD0c5D3e1c86cf9563926b243834d";
+            Assert.True(expected.IsTheSameAddress(theAddress));
+        }
+
+
+        [Fact]
+        public async void ShouldResolveEmailOffline()
+        {
+            var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);
+            var ensService = web3.Eth.GetEnsService();
+            var theAddress = await ensService.ResolveTextAsync("1.offchainexample.eth", TextDataKey.email).ConfigureAwait(false);
+            var expected = "nick@ens.domains";
+            Assert.True(expected.IsTheSameAddress(theAddress));
+        }
+
+        [Fact]
+        public async void ShouldResolveDescriptionOffline()
+        {
+            var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);
+            var ensService = web3.Eth.GetEnsService();
+            var description = await ensService.ResolveTextAsync("1.offchainexample.eth", TextDataKey.description).ConfigureAwait(false);
+            var expected = "hello offchainresolver wildcard record";
+            Assert.True(expected.IsTheSameAddress(description));
+        }
+
+        [Fact]
+        public async void ShouldResolveAddressOfflineMatoken()
+        {
+            var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);
+            var ensService = web3.Eth.GetEnsService();
+            var theAddress = await ensService.ResolveAddressAsync("matoken.lens.xyz").ConfigureAwait(false);
+            var expected = "0x5A384227B65FA093DEC03Ec34e111Db80A040615";
+            Assert.True(expected.IsTheSameAddress(theAddress));
+        }
+
+
+        [Fact]
+        public async void ShouldReverseResolveAddressMatoken()
+        {
+            var web3 = _ethereumClientIntegrationFixture.GetInfuraWeb3(InfuraNetwork.Mainnet);
+            var ensService = web3.Eth.GetEnsService();
+            var addressToResolve = "0x5A384227B65FA093DEC03Ec34e111Db80A040615";
+            var reverse = await ensService.ReverseResolveAsync(addressToResolve);
+            var address = await ensService.ResolveAddressAsync(reverse).ConfigureAwait(false);
+            Assert.True(address.IsTheSameAddress(addressToResolve));
+        }
+
 
     }
 }

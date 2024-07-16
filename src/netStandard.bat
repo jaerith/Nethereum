@@ -20,7 +20,9 @@ CALL :build
 cd ..
 
 cd Nethereum.Web3
+SET projectName=Nethereum.Web3.csproj
 CALL :build
+SET projectName=
 cd ..
 
 cd Nethereum.JsonRpc.IpcClient*
@@ -107,11 +109,44 @@ cd Nethereum.EVM
 CALL :build
 cd ..
 
+cd Nethereum.UI
+CALL :build
+cd ..
+
+
+cd Nethereum.Merkle
+CALL :build
+cd ..
+
+cd Nethereum.Merkle.Patricia
+CALL :build
+cd ..
+
+cd Nethereum.Metamask
+CALL :build
+cd ..
+
+cd Nethereum.Model
+CALL :build
+cd ..
+
+cd Nethereum.Mud
+CALL :build
+cd ..
+
+cd Nethereum.Mud.Contracts
+CALL :build
+cd ..
+
 EXIT /B %ERRORLEVEL%
 
 :build
 rem dotnet clean /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetStandard=true /property:TargetNet35=false /property:TargetUnityAOT=false
 rem  dotnet restore /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetStandard=true /property:TargetNet35=false /property:TargetUnityAOT=false
-dotnet build  -c Release /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetStandard=true /property:TargetNet35=false /property:TargetUnityAOT=false
-xcopy bin\Release\netstandard2.0\*.dll "..\compiledlibraries\netStandard" /s /y
-EXIT /B 0
+dotnet build %projectName% -c Release /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetStandard=true /property:TargetNet35=false /property:TargetUnityAOT=false
+IF %ERRORLEVEL% EQU 0 (
+    xcopy bin\Release\netstandard2.0\*.dll "..\compiledlibraries\netStandard" /s /y
+    EXIT /B 0
+) ELSE (
+    EXIT %ERRORLEVEL%
+)

@@ -171,7 +171,41 @@ rem echo "27"
 rem pause
 cd ..
 
-EXIT /B %ERRORLEVEL%
+cd Nethereum.UI
+CALL :build
+cd ..
+
+cd Nethereum.EVM
+CALL :build
+cd ..
+
+cd Nethereum.Merkle
+CALL :build
+cd ..
+
+cd Nethereum.Merkle.Patricia
+CALL :build
+cd ..
+
+cd Nethereum.Metamask
+CALL :build
+cd ..
+
+cd Nethereum.Model
+CALL :build
+cd ..
+
+cd Nethereum.WalletConnect
+CALL :build
+cd ..
+
+cd Nethereum.Mud
+CALL :build
+cd ..
+
+cd Nethereum.Mud.Contracts
+CALL :build
+cd ..
 
 :build
 rem dotnet clean /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetStandard=true /property:TargetNet35=false /property:TargetUnityAOT=true
@@ -179,4 +213,6 @@ rem  dotnet restore /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetS
 dotnet build  -c Release /property:ReleaseSuffix=%releaseSuffix% /property:TargetNetStandard=true /property:TargetNet35=false /property:TargetUnityAOT=true
 xcopy bin\Release\netstandard2.0\*.dll "..\compiledlibraries\netStandardUnityAOT" /s /y
 xcopy bin\Release\netstandard2.0\*.jslib "..\compiledlibraries\netStandardUnityAOT" /s /y
+xcopy bin\Release\netstandard2.1\*.dll "..\compiledlibraries\netStandardUnityAOT" /s /y
+xcopy bin\Release\netstandard2.1\*.jslib "..\compiledlibraries\netStandardUnityAOT" /s /y
 EXIT /B 0

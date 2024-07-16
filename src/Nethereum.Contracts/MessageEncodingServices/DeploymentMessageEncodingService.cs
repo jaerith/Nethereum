@@ -6,7 +6,7 @@ using Nethereum.RPC.Eth.DTOs;
 namespace Nethereum.Contracts.MessageEncodingServices
 {
     public class DeploymentMessageEncodingService<TContractDeployment> : 
-        IContractMessageTransactionInputCreator<TContractDeployment> where TContractDeployment: ContractDeploymentMessage
+        IContractMessageTransactionInputCreator<TContractDeployment> where TContractDeployment: ContractDeploymentMessage, new()
     {
         protected DeployContractTransactionBuilder DeployContractTransactionBuilder { get; set; }
         protected ConstructorCallDecoder ConstructorCallDecoder { get; set; }
@@ -39,6 +39,12 @@ namespace Nethereum.Contracts.MessageEncodingServices
             transactionInput.Nonce = contractMessage.GetHexNonce();
 
             return transactionInput;
+        }
+
+        public string GetDeploymentData(TContractDeployment contractMessage, params ByteCodeLibrary[] byteCodeLibraries)
+        {
+            contractMessage.LinkLibraries(byteCodeLibraries);
+            return DeployContractTransactionBuilder.GetData(contractMessage.ByteCode, contractMessage);
         }
 
         public string GetDeploymentData(TContractDeployment contractMessage)
@@ -84,42 +90,42 @@ namespace Nethereum.Contracts.MessageEncodingServices
             }
         }
 
-        public TContractDeployment DecodeTransaction(TContractDeployment contractMessageOuput, Transaction transactionInput)
+        public TContractDeployment DecodeTransaction(TContractDeployment contractMessageOutput, Transaction transactionInput)
         {
-            contractMessageOuput = DecodeInput(contractMessageOuput, transactionInput.Input);
-            contractMessageOuput.Nonce = transactionInput.Nonce?.Value;
-            contractMessageOuput.GasPrice = transactionInput.GasPrice?.Value;
-            contractMessageOuput.AmountToSend = transactionInput.Value == null ? 0 : transactionInput.Value.Value;
-            contractMessageOuput.Gas = transactionInput.Gas?.Value;
-            contractMessageOuput.FromAddress = transactionInput.From;
-            contractMessageOuput = DecodeInput(contractMessageOuput, transactionInput.Input);
+            contractMessageOutput = DecodeInput(contractMessageOutput, transactionInput.Input);
+            contractMessageOutput.Nonce = transactionInput.Nonce?.Value;
+            contractMessageOutput.GasPrice = transactionInput.GasPrice?.Value;
+            contractMessageOutput.AmountToSend = transactionInput.Value == null ? 0 : transactionInput.Value.Value;
+            contractMessageOutput.Gas = transactionInput.Gas?.Value;
+            contractMessageOutput.FromAddress = transactionInput.From;
+            contractMessageOutput = DecodeInput(contractMessageOutput, transactionInput.Input);
 
-            contractMessageOuput.FromAddress = transactionInput.From;
-            contractMessageOuput.MaxFeePerGas = transactionInput.MaxFeePerGas?.Value;
-            contractMessageOuput.MaxPriorityFeePerGas = transactionInput.MaxPriorityFeePerGas?.Value;
+            contractMessageOutput.FromAddress = transactionInput.From;
+            contractMessageOutput.MaxFeePerGas = transactionInput.MaxFeePerGas?.Value;
+            contractMessageOutput.MaxPriorityFeePerGas = transactionInput.MaxPriorityFeePerGas?.Value;
 
             if (transactionInput.Type == null)
             {
-                contractMessageOuput.TransactionType = null;
+                contractMessageOutput.TransactionType = null;
             }
             else
             {
-                contractMessageOuput.TransactionType = (byte)(transactionInput.Type.Value);
+                contractMessageOutput.TransactionType = (byte)(transactionInput.Type.Value);
             }
 
-            contractMessageOuput.AccessList = transactionInput.AccessList;
+            contractMessageOutput.AccessList = transactionInput.AccessList;
 
-            return contractMessageOuput;
+            return contractMessageOutput;
         }
 
-        public string GetSwarmAddressFromByteCode(TContractDeployment contractMessageOuput)
+        public string GetSwarmAddressFromByteCode(TContractDeployment contractMessageOutput)
         {
-            return ByteCodeSwarmExtractor.GetSwarmAddress(contractMessageOuput.ByteCode);
+            return ByteCodeSwarmExtractor.GetSwarmAddress(contractMessageOutput.ByteCode);
         }
 
-        public bool HasASwarmAddressTheByteCode(TContractDeployment contractMessageOuput)
+        public bool HasASwarmAddressTheByteCode(TContractDeployment contractMessageOutput)
         {
-            return ByteCodeSwarmExtractor.HasSwarmAddress(contractMessageOuput.ByteCode);
+            return ByteCodeSwarmExtractor.HasSwarmAddress(contractMessageOutput.ByteCode);
         }
     }
 }

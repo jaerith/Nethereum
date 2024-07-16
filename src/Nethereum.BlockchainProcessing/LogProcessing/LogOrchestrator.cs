@@ -5,6 +5,7 @@ using Nethereum.Contracts;
 using Nethereum.Contracts.Services;
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Util;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -13,6 +14,37 @@ using System.Threading.Tasks;
 
 namespace Nethereum.BlockchainProcessing.LogProcessing
 {
+    public class LogProcessParallelStrategy : ILogProcessStrategy
+    {
+        public int Partitions { get; set; } = 2;
+        public async Task ProcessLogs(FilterLog[] logs, IEnumerable<ProcessorHandler<FilterLog>> logProcessors)
+        {
+            await logProcessors.ForEachAsync(async logProcessor =>
+            {
+                foreach (var log in logs)
+                {
+                    await logProcessor.ExecuteAsync(log).ConfigureAwait(false);
+                }
+            }, Partitions);
+        }
+
+    }
+
+    public class LogProcessSequentialStrategy : ILogProcessStrategy
+    {
+        public async Task ProcessLogs(FilterLog[] logs, IEnumerable<ProcessorHandler<FilterLog>> logProcessors)
+        {
+            foreach (var logProcessor in logProcessors)
+            {
+                foreach (var log in logs)
+                {
+                    await logProcessor.ExecuteAsync(log).ConfigureAwait(false);
+                }
+            }
+        }
+    }
+
+
     public class LogOrchestrator : IBlockchainProcessingOrchestrator
     {
         public const int MaxGetLogsRetries = 10;
@@ -21,6 +53,7 @@ namespace Nethereum.BlockchainProcessing.LogProcessing
         private readonly IEnumerable<ProcessorHandler<FilterLog>> _logProcessors;
         private NewFilterInput _filterInput;
         private BlockRangeRequestStrategy _blockRangeRequestStrategy;
+        public ILogProcessStrategy LogProcessStrategy { get; set; } = new LogProcessParallelStrategy();
 
         protected IEthApiContractService EthApi { get; set; }
 
@@ -67,7 +100,7 @@ namespace Nethereum.BlockchainProcessing.LogProcessing
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 progress.Exception = ex;
             }
@@ -77,14 +110,18 @@ namespace Nethereum.BlockchainProcessing.LogProcessing
 
         private async Task InvokeLogProcessorsAsync(FilterLog[] logs)
         {
-            //TODO: Add parallel execution strategy
-            foreach (var logProcessor in _logProcessors)
+            await NewMethod(logs);
+        }
+
+        private async Task NewMethod(FilterLog[] logs)
+        {
+            await _logProcessors.ForEachAsync(async logProcessor =>
             {
                 foreach (var log in logs)
                 {
                     await logProcessor.ExecuteAsync(log).ConfigureAwait(false);
                 }
-            }
+            });
         }
 
         struct GetLogsResponse
@@ -96,14 +133,14 @@ namespace Nethereum.BlockchainProcessing.LogProcessing
                 To = to;
             }
 
-            public FilterLog[] Logs { get;set;}
+            public FilterLog[] Logs { get; set; }
             public BigInteger From { get; set; }
-            public BigInteger To { get; set;}
+            public BigInteger To { get; set; }
         }
 
         private async Task<GetLogsResponse?> GetLogsAsync(OrchestrationProgress progress, BigInteger fromBlock, BigInteger toBlock, CancellationToken cancellationToken = default(CancellationToken), int retryRequestNumber = 0, int retryNullLogsRequestNumber = 0)
         {
-            try 
+            try
             {
 
 
@@ -129,9 +166,9 @@ namespace Nethereum.BlockchainProcessing.LogProcessing
                 return new GetLogsResponse(fromBlock, adjustedToBlock, logs);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                
+
                 if (retryRequestNumber >= MaxGetLogsRetries || cancellationToken.IsCancellationRequested)
                 {
                     progress.Exception = ex;

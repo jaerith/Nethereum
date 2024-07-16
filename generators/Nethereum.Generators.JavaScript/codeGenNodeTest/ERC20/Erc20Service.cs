@@ -14,43 +14,52 @@ using Nethereum.Unity.Contracts.Standards.ERC20.ContractDefinition;
 
 namespace Nethereum.Unity.Contracts.Standards.ERC20
 {
-    public partial class Erc20Service
+    public partial class Erc20Service: ContractWeb3ServiceBase
     {
-        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Nethereum.Web3.Web3 web3, Erc20Deployment erc20Deployment, CancellationTokenSource cancellationTokenSource = null)
+        public static Task<TransactionReceipt> DeployContractAndWaitForReceiptAsync(Nethereum.Web3.IWeb3 web3, Erc20Deployment erc20Deployment, CancellationTokenSource cancellationTokenSource = null)
         {
             return web3.Eth.GetContractDeploymentHandler<Erc20Deployment>().SendRequestAndWaitForReceiptAsync(erc20Deployment, cancellationTokenSource);
         }
 
-        public static Task<string> DeployContractAsync(Nethereum.Web3.Web3 web3, Erc20Deployment erc20Deployment)
+        public static Task<string> DeployContractAsync(Nethereum.Web3.IWeb3 web3, Erc20Deployment erc20Deployment)
         {
             return web3.Eth.GetContractDeploymentHandler<Erc20Deployment>().SendRequestAsync(erc20Deployment);
         }
 
-        public static async Task<Erc20Service> DeployContractAndGetServiceAsync(Nethereum.Web3.Web3 web3, Erc20Deployment erc20Deployment, CancellationTokenSource cancellationTokenSource = null)
+        public static async Task<Erc20Service> DeployContractAndGetServiceAsync(Nethereum.Web3.IWeb3 web3, Erc20Deployment erc20Deployment, CancellationTokenSource cancellationTokenSource = null)
         {
             var receipt = await DeployContractAndWaitForReceiptAsync(web3, erc20Deployment, cancellationTokenSource);
             return new Erc20Service(web3, receipt.ContractAddress);
         }
 
-        protected Nethereum.Web3.Web3 Web3{ get; }
-
-        public ContractHandler ContractHandler { get; }
-
-        public Erc20Service(Nethereum.Web3.Web3 web3, string contractAddress)
+        public Erc20Service(Nethereum.Web3.IWeb3 web3, string contractAddress) : base(web3, contractAddress)
         {
-            Web3 = web3;
-            ContractHandler = web3.Eth.GetContractHandler(contractAddress);
         }
 
-        public Task<string> NameQueryAsync(NameFunction nameFunction, BlockParameter blockParameter = null)
+        public Task<byte[]> DomainSeparatorQueryAsync(DomainSeparatorFunction domainSeparatorFunction, BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryAsync<NameFunction, string>(nameFunction, blockParameter);
+            return ContractHandler.QueryAsync<DomainSeparatorFunction, byte[]>(domainSeparatorFunction, blockParameter);
         }
 
         
-        public Task<string> NameQueryAsync(BlockParameter blockParameter = null)
+        public Task<byte[]> DomainSeparatorQueryAsync(BlockParameter blockParameter = null)
         {
-            return ContractHandler.QueryAsync<NameFunction, string>(null, blockParameter);
+            return ContractHandler.QueryAsync<DomainSeparatorFunction, byte[]>(null, blockParameter);
+        }
+
+        public Task<BigInteger> AllowanceQueryAsync(AllowanceFunction allowanceFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<AllowanceFunction, BigInteger>(allowanceFunction, blockParameter);
+        }
+
+        
+        public Task<BigInteger> AllowanceQueryAsync(string owner, string spender, BlockParameter blockParameter = null)
+        {
+            var allowanceFunction = new AllowanceFunction();
+                allowanceFunction.Owner = owner;
+                allowanceFunction.Spender = spender;
+            
+            return ContractHandler.QueryAsync<AllowanceFunction, BigInteger>(allowanceFunction, blockParameter);
         }
 
         public Task<string> ApproveRequestAsync(ApproveFunction approveFunction)
@@ -81,6 +90,115 @@ namespace Nethereum.Unity.Contracts.Standards.ERC20
              return ContractHandler.SendRequestAndWaitForReceiptAsync(approveFunction, cancellationToken);
         }
 
+        public Task<BigInteger> BalanceOfQueryAsync(BalanceOfFunction balanceOfFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<BalanceOfFunction, BigInteger>(balanceOfFunction, blockParameter);
+        }
+
+        
+        public Task<BigInteger> BalanceOfQueryAsync(string account, BlockParameter blockParameter = null)
+        {
+            var balanceOfFunction = new BalanceOfFunction();
+                balanceOfFunction.Account = account;
+            
+            return ContractHandler.QueryAsync<BalanceOfFunction, BigInteger>(balanceOfFunction, blockParameter);
+        }
+
+        public Task<byte> DecimalsQueryAsync(DecimalsFunction decimalsFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<DecimalsFunction, byte>(decimalsFunction, blockParameter);
+        }
+
+        
+        public Task<byte> DecimalsQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<DecimalsFunction, byte>(null, blockParameter);
+        }
+
+        public Task<Eip712DomainOutputDTO> Eip712DomainQueryAsync(Eip712DomainFunction eip712DomainFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<Eip712DomainFunction, Eip712DomainOutputDTO>(eip712DomainFunction, blockParameter);
+        }
+
+        public Task<Eip712DomainOutputDTO> Eip712DomainQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryDeserializingToObjectAsync<Eip712DomainFunction, Eip712DomainOutputDTO>(null, blockParameter);
+        }
+
+        public Task<string> NameQueryAsync(NameFunction nameFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<NameFunction, string>(nameFunction, blockParameter);
+        }
+
+        
+        public Task<string> NameQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<NameFunction, string>(null, blockParameter);
+        }
+
+        public Task<BigInteger> NoncesQueryAsync(NoncesFunction noncesFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<NoncesFunction, BigInteger>(noncesFunction, blockParameter);
+        }
+
+        
+        public Task<BigInteger> NoncesQueryAsync(string owner, BlockParameter blockParameter = null)
+        {
+            var noncesFunction = new NoncesFunction();
+                noncesFunction.Owner = owner;
+            
+            return ContractHandler.QueryAsync<NoncesFunction, BigInteger>(noncesFunction, blockParameter);
+        }
+
+        public Task<string> PermitRequestAsync(PermitFunction permitFunction)
+        {
+             return ContractHandler.SendRequestAsync(permitFunction);
+        }
+
+        public Task<TransactionReceipt> PermitRequestAndWaitForReceiptAsync(PermitFunction permitFunction, CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(permitFunction, cancellationToken);
+        }
+
+        public Task<string> PermitRequestAsync(string owner, string spender, BigInteger value, BigInteger deadline, byte v, byte[] r, byte[] s)
+        {
+            var permitFunction = new PermitFunction();
+                permitFunction.Owner = owner;
+                permitFunction.Spender = spender;
+                permitFunction.Value = value;
+                permitFunction.Deadline = deadline;
+                permitFunction.V = v;
+                permitFunction.R = r;
+                permitFunction.S = s;
+            
+             return ContractHandler.SendRequestAsync(permitFunction);
+        }
+
+        public Task<TransactionReceipt> PermitRequestAndWaitForReceiptAsync(string owner, string spender, BigInteger value, BigInteger deadline, byte v, byte[] r, byte[] s, CancellationTokenSource cancellationToken = null)
+        {
+            var permitFunction = new PermitFunction();
+                permitFunction.Owner = owner;
+                permitFunction.Spender = spender;
+                permitFunction.Value = value;
+                permitFunction.Deadline = deadline;
+                permitFunction.V = v;
+                permitFunction.R = r;
+                permitFunction.S = s;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(permitFunction, cancellationToken);
+        }
+
+        public Task<string> SymbolQueryAsync(SymbolFunction symbolFunction, BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<SymbolFunction, string>(symbolFunction, blockParameter);
+        }
+
+        
+        public Task<string> SymbolQueryAsync(BlockParameter blockParameter = null)
+        {
+            return ContractHandler.QueryAsync<SymbolFunction, string>(null, blockParameter);
+        }
+
         public Task<BigInteger> TotalSupplyQueryAsync(TotalSupplyFunction totalSupplyFunction, BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<TotalSupplyFunction, BigInteger>(totalSupplyFunction, blockParameter);
@@ -90,6 +208,34 @@ namespace Nethereum.Unity.Contracts.Standards.ERC20
         public Task<BigInteger> TotalSupplyQueryAsync(BlockParameter blockParameter = null)
         {
             return ContractHandler.QueryAsync<TotalSupplyFunction, BigInteger>(null, blockParameter);
+        }
+
+        public Task<string> TransferRequestAsync(TransferFunction transferFunction)
+        {
+             return ContractHandler.SendRequestAsync(transferFunction);
+        }
+
+        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(TransferFunction transferFunction, CancellationTokenSource cancellationToken = null)
+        {
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFunction, cancellationToken);
+        }
+
+        public Task<string> TransferRequestAsync(string to, BigInteger value)
+        {
+            var transferFunction = new TransferFunction();
+                transferFunction.To = to;
+                transferFunction.Value = value;
+            
+             return ContractHandler.SendRequestAsync(transferFunction);
+        }
+
+        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(string to, BigInteger value, CancellationTokenSource cancellationToken = null)
+        {
+            var transferFunction = new TransferFunction();
+                transferFunction.To = to;
+                transferFunction.Value = value;
+            
+             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFunction, cancellationToken);
         }
 
         public Task<string> TransferFromRequestAsync(TransferFromFunction transferFromFunction)
@@ -122,83 +268,55 @@ namespace Nethereum.Unity.Contracts.Standards.ERC20
              return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFromFunction, cancellationToken);
         }
 
-        public Task<byte> DecimalsQueryAsync(DecimalsFunction decimalsFunction, BlockParameter blockParameter = null)
+        public override List<Type> GetAllFunctionTypes()
         {
-            return ContractHandler.QueryAsync<DecimalsFunction, byte>(decimalsFunction, blockParameter);
+            return new List<Type>
+            {
+                typeof(DomainSeparatorFunction),
+                typeof(AllowanceFunction),
+                typeof(ApproveFunction),
+                typeof(BalanceOfFunction),
+                typeof(DecimalsFunction),
+                typeof(Eip712DomainFunction),
+                typeof(NameFunction),
+                typeof(NoncesFunction),
+                typeof(PermitFunction),
+                typeof(SymbolFunction),
+                typeof(TotalSupplyFunction),
+                typeof(TransferFunction),
+                typeof(TransferFromFunction)
+            };
         }
 
-        
-        public Task<byte> DecimalsQueryAsync(BlockParameter blockParameter = null)
+        public override List<Type> GetAllEventTypes()
         {
-            return ContractHandler.QueryAsync<DecimalsFunction, byte>(null, blockParameter);
+            return new List<Type>
+            {
+                typeof(ApprovalEventDTO),
+                typeof(EIP712DomainChangedEventDTO),
+                typeof(TransferEventDTO)
+            };
         }
 
-        public Task<BigInteger> BalanceOfQueryAsync(BalanceOfFunction balanceOfFunction, BlockParameter blockParameter = null)
+        public override List<Type> GetAllErrorTypes()
         {
-            return ContractHandler.QueryAsync<BalanceOfFunction, BigInteger>(balanceOfFunction, blockParameter);
-        }
-
-        
-        public Task<BigInteger> BalanceOfQueryAsync(string owner, BlockParameter blockParameter = null)
-        {
-            var balanceOfFunction = new BalanceOfFunction();
-                balanceOfFunction.Owner = owner;
-            
-            return ContractHandler.QueryAsync<BalanceOfFunction, BigInteger>(balanceOfFunction, blockParameter);
-        }
-
-        public Task<string> SymbolQueryAsync(SymbolFunction symbolFunction, BlockParameter blockParameter = null)
-        {
-            return ContractHandler.QueryAsync<SymbolFunction, string>(symbolFunction, blockParameter);
-        }
-
-        
-        public Task<string> SymbolQueryAsync(BlockParameter blockParameter = null)
-        {
-            return ContractHandler.QueryAsync<SymbolFunction, string>(null, blockParameter);
-        }
-
-        public Task<string> TransferRequestAsync(TransferFunction transferFunction)
-        {
-             return ContractHandler.SendRequestAsync(transferFunction);
-        }
-
-        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(TransferFunction transferFunction, CancellationTokenSource cancellationToken = null)
-        {
-             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFunction, cancellationToken);
-        }
-
-        public Task<string> TransferRequestAsync(string to, BigInteger value)
-        {
-            var transferFunction = new TransferFunction();
-                transferFunction.To = to;
-                transferFunction.Value = value;
-            
-             return ContractHandler.SendRequestAsync(transferFunction);
-        }
-
-        public Task<TransactionReceipt> TransferRequestAndWaitForReceiptAsync(string to, BigInteger value, CancellationTokenSource cancellationToken = null)
-        {
-            var transferFunction = new TransferFunction();
-                transferFunction.To = to;
-                transferFunction.Value = value;
-            
-             return ContractHandler.SendRequestAndWaitForReceiptAsync(transferFunction, cancellationToken);
-        }
-
-        public Task<BigInteger> AllowanceQueryAsync(AllowanceFunction allowanceFunction, BlockParameter blockParameter = null)
-        {
-            return ContractHandler.QueryAsync<AllowanceFunction, BigInteger>(allowanceFunction, blockParameter);
-        }
-
-        
-        public Task<BigInteger> AllowanceQueryAsync(string owner, string spender, BlockParameter blockParameter = null)
-        {
-            var allowanceFunction = new AllowanceFunction();
-                allowanceFunction.Owner = owner;
-                allowanceFunction.Spender = spender;
-            
-            return ContractHandler.QueryAsync<AllowanceFunction, BigInteger>(allowanceFunction, blockParameter);
+            return new List<Type>
+            {
+                typeof(ECDSAInvalidSignatureError),
+                typeof(ECDSAInvalidSignatureLengthError),
+                typeof(ECDSAInvalidSignatureSError),
+                typeof(ERC20InsufficientAllowanceError),
+                typeof(ERC20InsufficientBalanceError),
+                typeof(ERC20InvalidApproverError),
+                typeof(ERC20InvalidReceiverError),
+                typeof(ERC20InvalidSenderError),
+                typeof(ERC20InvalidSpenderError),
+                typeof(ERC2612ExpiredSignatureError),
+                typeof(ERC2612InvalidSignerError),
+                typeof(InvalidAccountNonceError),
+                typeof(InvalidShortStringError),
+                typeof(StringTooLongError)
+            };
         }
     }
 }

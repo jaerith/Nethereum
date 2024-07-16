@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
  
 using Nethereum.JsonRpc.Client;
@@ -53,6 +55,38 @@ namespace Nethereum.RPC.Eth.Transactions
             if (callInput == null) throw new ArgumentNullException(nameof(callInput));
             return base.SendRequestAsync(id, callInput, DefaultBlock);
         }
+
+        public RpcRequestResponseBatchItem<EthCall, string> CreateBatchItem(CallInput callInput, object id)
+        {
+            if (callInput == null) throw new ArgumentNullException(nameof(callInput));
+            return new RpcRequestResponseBatchItem<EthCall, string>(this, BuildRequest(callInput, DefaultBlock, id));
+        }
+
+        public RpcRequestResponseBatchItem<EthCall, string> CreateBatchItem(CallInput callInput, BlockParameter block, object id)
+        {
+            if (callInput == null) throw new ArgumentNullException(nameof(callInput));
+            return new RpcRequestResponseBatchItem<EthCall, string>(this, BuildRequest(callInput, block, id));
+        }
+
+#if !DOTNET35
+        public Task<List<string>> SendBatchRequestAsync(params CallInput[] callInputs)
+        {
+           return SendBatchRequestAsync(callInputs, DefaultBlock);
+        }
+
+        public async Task<List<string>> SendBatchRequestAsync(CallInput[] callInputs, BlockParameter block)
+        {
+            var batchRequest = new RpcRequestResponseBatch();
+            for (int i = 0; i < callInputs.Length; i++)
+            {
+                batchRequest.BatchItems.Add(CreateBatchItem(callInputs[i], block, i));
+            }
+
+            var response = await Client.SendBatchRequestAsync(batchRequest).ConfigureAwait(false);
+            return response.BatchItems.Select(x => ((RpcRequestResponseBatchItem<EthCall, string>)x).Response).ToList();
+
+        }
+#endif
 
         public RpcRequest BuildRequest(CallInput callInput, BlockParameter block, object id = null)
         {

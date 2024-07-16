@@ -10,18 +10,32 @@ namespace Nethereum.ABI.FunctionEncoding
 {
     public class FunctionCallDecoder : ParameterDecoder
     {
-        public bool IsDataForFunction(string sha3Signature, string data)
+        public bool IsDataForFunction(FunctionABI functionABI, string data)
         {
-            sha3Signature = sha3Signature.EnsureHexPrefix();
-            data = data.EnsureHexPrefix();
-            
-            if (data == "0x") return false;
-            
-            if(string.Equals(data.ToLower(), sha3Signature.ToLower(), StringComparison.Ordinal)) return true;
+            return SignatureEncoder.IsDataForSignature(functionABI.Sha3Signature, data);
+        }
 
-            if (data.ToLower().StartsWith(sha3Signature.ToLower())) return true;
+        public bool IsDataForError(ErrorABI errorABI, string data)
+        {
+            return SignatureEncoder.IsDataForSignature(errorABI.Sha3Signature, data);
+        }
 
-            return false;
+       
+        public List<ParameterOutput> DecodeInput(FunctionABI functionABI, string data)
+        {
+            return DecodeFunctionInput(functionABI.Sha3Signature, data,
+                functionABI.InputParameters);
+        }
+
+        public List<ParameterOutput> DecodeError(ErrorABI errorABI, string data)
+        {
+            return DecodeFunctionInput(errorABI.Sha3Signature, data,
+                errorABI.InputParameters);
+        }
+
+        public object DecodeError(Type errorType, string data)
+        {
+            return DecodeAttributes(data.HexToByteArray(), errorType);
         }
 
         public List<ParameterOutput> DecodeFunctionInput(string sha3Signature, string data,
@@ -30,7 +44,7 @@ namespace Nethereum.ABI.FunctionEncoding
             sha3Signature = sha3Signature.EnsureHexPrefix();
             data = data.EnsureHexPrefix();
 
-            if (!IsDataForFunction(sha3Signature, data)) return null;
+            if (!SignatureEncoder.IsDataForSignature(sha3Signature, data)) return null;
 
             if (data.StartsWith(sha3Signature))
                 data = data.Substring(sha3Signature.Length); //4 bytes?
@@ -174,8 +188,6 @@ namespace Nethereum.ABI.FunctionEncoding
                     if (results.Any())
                         return (T)results[0].Result;
                 }
-
-                
             }
 
             return default(T);

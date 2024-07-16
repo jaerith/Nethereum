@@ -1,4 +1,5 @@
-﻿using Nethereum.Contracts.Standards.ENS;
+﻿using ADRaffy.ENSNormalize;
+using Nethereum.Contracts.Standards.ENS;
 using Xunit;
 
 namespace Nethereum.Contracts.UnitTests
@@ -36,13 +37,16 @@ namespace Nethereum.Contracts.UnitTests
 
 
         [Fact]
-        public void ShouldNormaliseInternationalDomain()
+        public void ShouldNotNormaliseMixtureOfCharactersDomain()
         {
             var input = "fоо.eth"; // with cyrillic 'o'
             var expected = "fоо.eth";
-            var output = new EnsUtil().Normalise(input);
-            Assert.Equal(expected, output);
+
+            Assert.Throws<InvalidLabelException>( () => 
+                    new EnsUtil().Normalise(input));
+            //Invalid label "fоо‎": illegal mixture: Latin + Cyrillic о‎ {43E}
         }
+
 
         [Fact]
         public void ShouldNormaliseToLowerDomain()
@@ -60,6 +64,21 @@ namespace Nethereum.Contracts.UnitTests
             var expected = "🦚.eth";
             var output = new EnsUtil().Normalise(input);
             Assert.Equal(expected, output);
+        }
+
+
+        [Theory]
+        [InlineData("vitalik.eth", "0x07766974616c696b0365746800")]
+        [InlineData("vitalik.wallet.eth", "0x07766974616c696b0677616c6c65740365746800")]
+        [InlineData("ViTalIk.WALlet.Eth", "0x07766974616c696b0677616c6c65740365746800")]
+        [InlineData("123.eth", "0x033132330365746800")]
+        [InlineData("öbb.at", "0x04c3b6626202617400")]
+        [InlineData("Ⓜ", "0x016d00")]
+        [InlineData("💩💩︎💩️", "0x0cf09f92a9f09f92a9f09f92a900")]
+        public void ShouldDnsEncode(string domain, string expected)
+        {
+            var encoded = new EnsUtil().DnsEncode(domain);
+            Assert.Equal(expected, encoded);
         }
 
     }

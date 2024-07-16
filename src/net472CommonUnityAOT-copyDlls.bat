@@ -21,6 +21,17 @@ xcopy "compiledlibraries\net472dllsAOT\Nethereum.Unity.dll" "compiledlibraries\n
 xcopy "compiledlibraries\net472dllsAOT\Nethereum.Unity.Metamask.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Unity.Metamask.dll" /s /y
 xcopy "compiledlibraries\net472dllsAOT\Nethereum.Util.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Util.dll" /s /y
 xcopy "compiledlibraries\net472dllsAOT\Nethereum.Web3.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Web3.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.UI.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.UI.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.UI.Host.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.UI.Host.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Merkle.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Merkle.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Merkle.Patricia.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Merkle.Patricia.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Metamask.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Metamask.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.EVM.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.EVM.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Optimism.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Optimism.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Besu.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Besu.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Geth.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Geth.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Mud.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Mud.dll" /s /y
+xcopy "compiledlibraries\net472dllsAOT\Nethereum.Mud.Contracts.dll" "compiledlibraries\net472UnityCommonAOT\Nethereum.Mud.Contracts.dll" /s /y
 xcopy "compiledlibraries\net472dllsAOT\*.jslib "compiledlibraries\net472UnityCommonAOT" /s /y
 
 EXIT /B 0

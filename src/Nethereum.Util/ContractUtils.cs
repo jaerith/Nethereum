@@ -6,6 +6,10 @@ namespace Nethereum.Util
 {
     public static class ContractUtils
     {
+        public const string LIBRARY_PLACEHOLDER = "__$";
+
+        public const int MAXIMUM_BYTECODE_SIZE = 24576;
+
         public static string CalculateContractAddress(string address, BigInteger nonce)
         {
             if (string.IsNullOrEmpty(address))
@@ -36,6 +40,19 @@ namespace Nethereum.Util
 
         public static string CalculateCreate2Address(string address, string saltHex, string byteCodeHex)
         {
+            if(byteCodeHex.Contains(LIBRARY_PLACEHOLDER)) throw new System.ArgumentException($"'{nameof(byteCodeHex)}' cannot contain the placeholder {LIBRARY_PLACEHOLDER}", nameof(byteCodeHex));
+            var sha3 = new Sha3Keccack();
+            return CalculateCreate2AddressUsingByteCodeHash(address, saltHex, sha3.CalculateHashFromHex(byteCodeHex));
+        }
+
+
+        public static bool IsContractByteCodeSizeAboveLimit(string byteCodeHex)
+        {
+            return byteCodeHex.RemoveHexPrefix().Length / 2 > MAXIMUM_BYTECODE_SIZE;
+        }
+
+        public static string CalculateCreate2AddressUsingByteCodeHash(string address, string saltHex, string byteCodeHexHash)
+        {
             if (string.IsNullOrEmpty(address))
             {
                 throw new System.ArgumentException($"'{nameof(address)}' cannot be null or empty.", nameof(address));
@@ -50,9 +67,11 @@ namespace Nethereum.Util
             {
                 throw new System.ArgumentException($"'{nameof(saltHex)}' needs to be 32 bytes", nameof(saltHex));
             }
+            //ensure the address is a checksum address for hex hashing
+            address = address.ConvertToEthereumChecksumAddress();
 
             var sha3 = new Sha3Keccack();
-            return sha3.CalculateHashFromHex("0xff", address, saltHex, sha3.CalculateHashFromHex(byteCodeHex))
+            return sha3.CalculateHashFromHex("0xff", address, saltHex, byteCodeHexHash)
                 .Substring(24).ConvertToEthereumChecksumAddress();
         }
     }

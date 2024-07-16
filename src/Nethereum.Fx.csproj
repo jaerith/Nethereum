@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net8.0;net5.0;netcoreapp3.1;netstandard2.0;netstandard2.1</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -31,22 +31,50 @@
     <OutputPath>..\FxOutput\Nethereum.Fx\</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
+		<Optimize>True</Optimize>
+	</PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp3.1|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <PackageReference Include="NBitcoin.Secp256k1">
-      <Version>1.0.3</Version>
+		<Version>3.1.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="NBitcoin.Secp256k1">
-      <Version>1.0.3</Version>
+		<Version>3.1.1</Version>
     </PackageReference>
   </ItemGroup>
-   
-	<ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'netstandard1.1' AND '$(TargetFramework)' != 'net451' AND '$(TargetFramework)' != 'netcoreapp2.1' ">
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-   </ItemGroup>
+<ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+	<PackageReference Include="NBitcoin.Secp256k1">
+		<Version>3.1.1</Version>
+	</PackageReference>
+</ItemGroup>
+
+
+<ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'netstandard1.1' AND '$(TargetFramework)' != 'net451' AND '$(TargetFramework)' != 'netcoreapp2.1' ">
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[6.0.1,9)" />
+</ItemGroup>
+
  
-	<ItemGroup>
+<ItemGroup>
+    <PackageReference Include="ADRaffy.ENSNormalize" Version="0.1.5" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="NBitcoin" Version="7.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="[11.0.2,14)" />
@@ -58,6 +86,9 @@
     <Compile Remove="Nethereum.BigInteger.N351\**" />
     <Compile Remove="Nethereum.ClassDiagrams\**" />
     <Compile Remove="Nethereum.ENS\**" />
+	<Compile Remove="Nethereum.Etherscan\**" />
+	<Compile Remove="Nethereum.JsonRpc.WebSocketStreamingClient\obj\**" />
+	<None Remove="Nethereum.Etherscan\**" />
     <Compile Remove="Nethereum.EVM\obj\**" />
     <Compile Remove="Nethereum.EVM\Properties\**" />
     <Compile Remove="Nethereum.Generators.JavaScript\**" />
@@ -86,6 +117,10 @@
     <Compile Remove="Nethereum.RPC\Properties\**;Nethereum.RPC\bin\**;Nethereum.RPC\obj\**" />
 
     <None Remove="Nethereum.JsonRpc.UnixIpcClient\**" />
+
+    <None Remove="Nethereum.JsonRpc.WebSocketStreamingClient\obj\**" />
+
+   
     <None Remove="Nethereum.RPC\Properties\**;Nethereum.RPC\bin\**;Nethereum.RPC\obj\**" />
 
     <Compile Remove="Nethereum.Web3\Properties\**;Nethereum.Web3\bin\**;Nethereum.Web3\obj\**" />
@@ -93,6 +128,10 @@
     <None Remove="Nethereum.StandardNonFungibleTokenERC721\**" />
 
     <None Remove="Nethereum.StandardTokenEIP20\**" />
+
+    <None Remove="Nethereum.UI\**" />
+
+    <None Remove="Nethereum.WalletConnect\**" />
 
     <None Remove="Nethereum.Web3\Properties\**;Nethereum.Web3\bin\**;Nethereum.Web3\obj\**" />
 	<None Remove="Nethereum.EVM\bin\**" />
@@ -179,6 +218,24 @@
 
 	  <Compile Remove="Nethereum.Unity.Metamask\Properties\**;Nethereum.Unity.Metamask\bin\**;Nethereum.Unity.Metamask\obj\**" />
 	  <None Remove="Nethereum.Unity.Metamask\Properties\**;Nethereum.Unity.Metamask\bin\**;Nethereum.Unity.Metamask\obj\**" />
+
+	  <Compile Remove="Nethereum.Merkle\Properties\**;Nethereum.Merkle\bin\**;Nethereum.Merkle\obj\**" />
+	  <None Remove="Nethereum.Merkle\Properties\**;Nethereum.Merkle\bin\**;Nethereum.Merkle\obj\**" />
+
+	  <Compile Remove="Nethereum.Merkle.Patricia\Properties\**;Nethereum.Merkle.Patricia\bin\**;Nethereum.Merkle.Patricia\obj\**" />
+	  <None Remove="Nethereum.Merkle.Patricia\Properties\**;Nethereum.Merkle.Patricia\bin\**;Nethereum.Merkle.Patricia\obj\**" />
+
+	  <Compile Remove="Nethereum.EVM.Contracts\Properties\**;Nethereum.EVM.Contracts\bin\**;Nethereum.EVM.Contracts\obj\**" />
+	  <None Remove="Nethereum.EVM.Contracts\Properties\**;Nethereum.EVM.Contracts\bin\**;Nethereum.EVM.Contracts\obj\**" />
+
+	  <Compile Remove="Nethereum.RPC.Extensions\Properties\**;Nethereum.RPC.Extensions\bin\**;Nethereum.RPC.Extensions\obj\**" />
+	  <None Remove="Nethereum.RPC.Extensions\Properties\**;Nethereum.RPC.Extensions\bin\**;Nethereum.RPC.Extensions\obj\**" />
+	  
+      <Compile Remove="Nethereum.DataServices\Properties\**;Nethereum.DataServices\bin\**;Nethereum.DataServices\obj\**" />
+	  <None Remove="Nethereum.DataServices\Properties\**;Nethereum.DataServices\bin\**;Nethereum.DataServices\obj\**" />
+        
+	 
+
   </ItemGroup>
   
   <ItemGroup>
@@ -193,15 +250,25 @@
 
 	<Compile Remove="Nethereum.Metamask\**" />
 
+	<Compile Remove="Nethereum.WalletConnect\**" />
+
 	<Compile Remove="Nethereum.Metamask.Blazor\**" />
 	  
     <Compile Remove="Nethereum.Signer.Ledger\**" />
 
     <Compile Remove="Nethereum.Signer.Trezor\**" />
 
-	  <Compile Remove="Nethereum.Unity\**" />
+	<Compile Remove="Nethereum.Unity\**" />
 	  
-	  <Compile Remove="Nethereum.Unity.Metamask\**" />
+	<Compile Remove="Nethereum.Unity.Metamask\**" />
+
+	<None Remove="Nethereum.Mud.Contracts\**" />
+
+	<None Remove="Nethereum.Mud\**" />
+
+	<Compile Remove="Nethereum.Mud\**" />
+
+	<Compile Remove="Nethereum.Mud.Contracts\**" />
 
     <EmbeddedResource Remove="compiledlibraries\**" />
 
@@ -219,6 +286,8 @@
 
     <EmbeddedResource Remove="Nethereum.JsonRpc.UnixIpcClient\**" />
 
+    <EmbeddedResource Remove="Nethereum.JsonRpc.WebSocketStreamingClient\obj\**" />
+
     <EmbeddedResource Remove="Nethereum.Signer.AzureKeyVault\**" />
 
     <EmbeddedResource Remove="Nethereum.Signer.Ledger\**" />
@@ -229,8 +298,14 @@
 
     <EmbeddedResource Remove="Nethereum.StandardTokenEIP20\**" />
 
+    <EmbeddedResource Remove="Nethereum.UI\**" />
+
 	<EmbeddedResource Remove="Nethereum.Unity\**" />
 	<EmbeddedResource Remove="Nethereum.Unity.Metamask\**" />
+
+	<EmbeddedResource Remove="Nethereum.Mud\**" />
+	<EmbeddedResource Remove="Nethereum.Mud.Contracts\**" />
+	<EmbeddedResource Remove="Nethereum.WalletConnect\**" />
 
     <None Remove="compiledlibraries\**" />
   
@@ -254,9 +329,19 @@
     <None Remove="net472.bat" />
     <None Remove="net472AOT.bat" />
     <None Remove="net472AOT.sh" />
+    <None Remove="net472CommonUnityAOT-copyDlls.bat" />
+    <None Remove="netStandard.bat" />
+    <None Remove="netStandardCommonUnityAOT-copyDlls.bat" />
+    <None Remove="netStandardMinimalWebglUnityAOT-copyDlls.bat" />
+    <None Remove="netStandardUnityAOT.bat" />
     <None Remove="nuget-verify.bat" />
     <None Remove="nuget.bat" />
+    <None Remove="nugetDevBuild.bat" />
+    <None Remove="nugetFx.bat" />
     <None Remove="nugethd.bat" />
+    <None Remove="nugetNewStuff.bat" />
+    <None Remove="readmeBatchIssues.txt" />
+    <None Remove="runAllUnityAndNuget.bat" />
     <None Remove="unitynet35.bat" />
     <None Remove="vstsSimpleBuildCore.txt" />
     <None Remove="vstsSimpleBuildGenerators.txt" />

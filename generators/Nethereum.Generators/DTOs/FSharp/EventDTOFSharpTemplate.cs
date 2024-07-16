@@ -14,16 +14,23 @@ namespace Nethereum.Generators.DTOs
 
         public override string GenerateClass()
         {
-            if (Model.CanGenerateOutputDTO())
+            if (Model.HasParameters())
             {
                 return
-                    $@"{SpaceUtils.OneTab}[<Event(""{Model.EventABI.Name}"")>]
-{SpaceUtils.OneTab}type {Model.GetTypeName()}() =
-{SpaceUtils.TwoTabs}inherit EventDTO()
+                    $@"{SpaceUtils.One__Tab}[<Event(""{Model.EventABI.Name}"")>]
+{SpaceUtils.One__Tab}type {Model.GetTypeName()}() =
+{SpaceUtils.Two___Tabs}inherit EventDTO()
 {_parameterAbiEventDtoFSharpTemplate.GenerateAllProperties(Model.EventABI.InputParameters)}
-{SpaceUtils.OneTab}";
+{SpaceUtils.One__Tab}";
             }
-            return null;
+            else
+            {
+                return
+                 $@"{SpaceUtils.One__Tab}[<Event(""{Model.EventABI.Name}"")>]
+{SpaceUtils.One__Tab}type {Model.GetTypeName()}() =
+{SpaceUtils.Two___Tabs}inherit EventDTO()
+{SpaceUtils.One__Tab}";
+            }
         }
     }
 

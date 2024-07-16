@@ -17,6 +17,8 @@ namespace Nethereum.JsonRpc.Client
     public class RpcClient : ClientBase
     {
         private const int NUMBER_OF_SECONDS_TO_RECREATE_HTTP_CLIENT = 60;
+        private const int NUMBER_OF_MINUTES_TO_POOL_CONNECTIONS = 10;
+        private const int NUMBER_OF_MINUTES_TO_IDLE_CONNECTIONS = 5;
         public static int MaximumConnectionsPerServer { get; set; } = 20;
         private readonly AuthenticationHeaderValue _authHeaderValue;
         private readonly Uri _baseUrl;
@@ -70,8 +72,8 @@ namespace Nethereum.JsonRpc.Client
 #elif NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0_OR_GREATER
                 return new SocketsHttpHandler
                 {
-                    PooledConnectionLifetime = new TimeSpan(0, NUMBER_OF_SECONDS_TO_RECREATE_HTTP_CLIENT, 0),
-                    PooledConnectionIdleTimeout = new TimeSpan(0, NUMBER_OF_SECONDS_TO_RECREATE_HTTP_CLIENT, 0),
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(NUMBER_OF_MINUTES_TO_POOL_CONNECTIONS),
+                    PooledConnectionIdleTimeout = TimeSpan.FromMinutes(NUMBER_OF_MINUTES_TO_IDLE_CONNECTIONS),
                     MaxConnectionsPerServer = MaximumConnectionsPerServer
                 };
 #else

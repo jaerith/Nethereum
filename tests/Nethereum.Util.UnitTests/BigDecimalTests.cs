@@ -111,7 +111,7 @@ namespace Nethereum.Util.UnitTests
         [InlineData("-0.5")]
         [InlineData("0.51")]
         [InlineData("-0.512")]
-        [InlineData("-121212121423.0512")]
+        [InlineData("-121212121423.051")]
         [InlineData("1")]
         [InlineData("0")]
         [InlineData("-1")]
@@ -122,10 +122,39 @@ namespace Nethereum.Util.UnitTests
         }
 
         [Fact]
-        public void ShouldPow()
+        public void ShouldPowBigDecimal()
         {
-            var value = BigDecimal.Pow(10, 27);
+            var value = BigDecimal.Pow(new BigDecimal(10), 27);
             Assert.Equal("1000000000000000000000000000", value.ToString());
         }
+
+        [Fact]
+        public void ShouldPowVeryBigDecimal()
+        {
+            var value = BigDecimal.Pow(BigDecimal.Parse("1000000000000000000000000000"), 27);
+            Assert.Equal("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", value.ToString());
+        }
+
+        [Fact]
+        public void ShouldPowSimpleDecimal()
+        {
+            var value = BigDecimal.Pow(BigDecimal.Parse("10.1111"), 10);
+            Assert.Equal("11168222466.7973515422804822284299491289977143475601", value.ToString());
+        }
+
+        [Fact]
+        public void ShouldPowDouble()
+        {
+            var value = BigDecimal.Pow((double)10,(double)27);
+            Assert.Equal("1000000000000000000000000000", value.ToString());
+        }
+
+        [Fact]
+        public void ShouldNotHangFromDouble()
+        {
+            var converted = (BigDecimal)double.Epsilon; // hangs
+        }
+
+
     }
 }

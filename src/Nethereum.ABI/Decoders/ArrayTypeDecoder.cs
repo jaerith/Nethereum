@@ -47,7 +47,11 @@ namespace Nethereum.ABI.Decoders
 
         protected virtual object DecodeDynamicElementType(byte[] encoded, Type type, int size)
         {
+            if (size * 32 > encoded.Length) throw new Exception($@"Insufficient data length to decode Array. Data: {encoded.Length}, Size: {size}");
+
             var decodedListOutput = (IList) Activator.CreateInstance(type);
+
+
 
             if (decodedListOutput == null)
                 throw new Exception("Only types that implement IList<T> are supported to decode Array Types");
@@ -115,6 +119,8 @@ namespace Nethereum.ABI.Decoders
 
         protected virtual object DecodeStaticElementType(byte[] encoded, Type type, int size)
         {
+            if (size * 32 > encoded.Length) throw new Exception($@"Insufficient data length to decode Array. Data: {encoded.Length}, Size: {size}");
+
             var decodedListOutput = (IList) Activator.CreateInstance(type);
 
             if (decodedListOutput == null)
@@ -150,6 +156,62 @@ namespace Nethereum.ABI.Decoders
                 .FirstOrDefault(i => i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
             return enumType?.GenericTypeArguments[0];
 #endif
+        }
+
+        public object DecodePackedUsingElementPacked(byte[] encoded, Type type)
+        {
+            if (this.ElementType.IsDynamic() || this.ElementType.StaticSize == 0)
+                throw new Exception("Packed decoding only supported on arrays for static element types");
+
+            var decodedListOutput = (IList)Activator.CreateInstance(type);
+
+            if (decodedListOutput == null)
+                throw new Exception("Only types that implement IList<T> are supported to decode Array Types");
+
+            var elementType = GetIListElementType(type);
+
+            if (elementType == null)
+                throw new Exception("Only types that implement IList<T> are supported to decode Array Types");
+
+            var currentIndex = 0;
+
+            while (currentIndex * ElementType.StaticSize < encoded.Length)
+            {
+                var encodedElement = encoded.Skip(currentIndex * ElementType.StaticSize).Take(ElementType.StaticSize).ToArray();
+                decodedListOutput.Add(ElementType.DecodePacked(encodedElement, elementType));
+                currentIndex++;
+            }
+
+            return decodedListOutput;
+        }
+
+        public override object DecodePacked(byte[] encoded, Type type)
+        {
+
+            if (this.ElementType.IsDynamic() || this.ElementType.StaticSize == 0)
+                throw new Exception("Packed decoding only supported on arrays for static element types");
+
+            var decodedListOutput = (IList)Activator.CreateInstance(type);
+
+            if (decodedListOutput == null)
+                throw new Exception("Only types that implement IList<T> are supported to decode Array Types");
+
+            var elementType = GetIListElementType(type);
+
+            if (elementType == null)
+                throw new Exception("Only types that implement IList<T> are supported to decode Array Types");
+
+            var currentIndex = 0;
+
+            while (currentIndex * ElementType.FixedSize < encoded.Length)
+            {
+                var encodedElement = encoded.Skip(currentIndex * ElementType.FixedSize).Take(ElementType.FixedSize).ToArray();
+                decodedListOutput.Add(ElementType.DecodePacked(encodedElement, elementType));
+                currentIndex++;
+            }
+
+            return decodedListOutput;
+
         }
     }
 }

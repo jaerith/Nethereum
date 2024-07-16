@@ -88,7 +88,26 @@ namespace Nethereum.Util
             return ret;
         }
 
-        public static byte[] ShiftLeft(this byte[] value, int shift)
+        public static byte[] PadBytesLeft(this byte[] bytesToPad, int numberOfBytes)
+        {
+            if(numberOfBytes < bytesToPad.Length) throw new ArgumentException("Cannot pad to a size smaller than the original size");
+
+            return PadBytes(bytesToPad, numberOfBytes);
+        }
+
+        public static byte[] PadBytesRight(this byte[] bytesToPad, int numberOfBytes)
+        {
+            var ret = new byte[numberOfBytes];
+
+            for (var i = 0; i < ret.Length; i++)
+                ret[i] = 0;
+            Array.Copy(bytesToPad, 0, ret, 0, bytesToPad.Length);
+
+            return ret;
+        }
+
+
+            public static byte[] ShiftLeft(this byte[] value, int shift)
         {
 //#if NETCOREAPP2_0_OR_GREATER
 
@@ -151,7 +170,7 @@ namespace Nethereum.Util
     }
 
 
-    public class ByteArrayComparer : IComparer<byte[]>
+    public class ByteArrayComparer : IComparer<byte[]>, IEqualityComparer<byte[]>
     {
         public readonly static ByteArrayComparer Current = new ByteArrayComparer();
 
@@ -169,6 +188,16 @@ namespace Nethereum.Util
                 if (result != 0) return result;
             }
             return x.Count().CompareTo(y.Count());
+        }
+
+        public bool Equals(byte[] x, byte[] y)
+        {
+           return Compare(x, y) == 0;
+        }
+
+        public int GetHashCode(byte[] obj)
+        {
+            return new BigInteger(obj).GetHashCode();
         }
     }
 

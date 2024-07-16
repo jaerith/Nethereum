@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
  
 using Nethereum.Hex.HexConvertors.Extensions;
@@ -60,6 +63,28 @@ namespace Nethereum.RPC.Eth.Transactions
         {
             return base.SendRequestAsync(id, hashTransaction.EnsureHexPrefix());
         }
+
+        public RpcRequestResponseBatchItem<EthGetTransactionByHash, Transaction> CreateBatchItem(string transactionHash, object id)
+        {
+            return new RpcRequestResponseBatchItem<EthGetTransactionByHash, Transaction>(this, BuildRequest(transactionHash, id));
+        }
+
+       
+
+#if !DOTNET35
+        public async Task<List<Transaction>> SendBatchRequestAsync(string[] transactionHashes)
+        {
+            var batchRequest = new RpcRequestResponseBatch();
+            for (int i = 0; i < transactionHashes.Length; i++)
+            {
+                batchRequest.BatchItems.Add(CreateBatchItem(transactionHashes[i], i));
+            }
+
+            var response = await Client.SendBatchRequestAsync(batchRequest);
+            return response.BatchItems.Select(x => ((RpcRequestResponseBatchItem<EthGetTransactionByHash, Transaction>)x).Response).ToList();
+
+        }
+#endif
 
         public RpcRequest BuildRequest(string hashTransaction, object id = null)
         {

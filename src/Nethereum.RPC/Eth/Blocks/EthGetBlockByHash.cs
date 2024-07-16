@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.JsonRpc.Client;
@@ -76,11 +78,30 @@ namespace Nethereum.RPC.Eth.Blocks
             : base(client, ApiMethods.eth_getBlockByHash.ToString())
         {
         }
+        public RpcRequestResponseBatchItem<EthGetBlockWithTransactionsByHash, BlockWithTransactions> CreateBatchItem(string blockHash, object id)
+        {
+            return new RpcRequestResponseBatchItem<EthGetBlockWithTransactionsByHash, BlockWithTransactions>(this, BuildRequest(blockHash, id));
+        }
 
         public Task<BlockWithTransactions> SendRequestAsync(string blockHash, object id = null)
         {
             return base.SendRequestAsync(id, blockHash.EnsureHexPrefix(), true);
         }
+
+#if !DOTNET35
+        public async Task<List<BlockWithTransactions>> SendBatchRequestAsync(params string[] blockHashes)
+        {
+            var batchRequest = new RpcRequestResponseBatch();
+            for (int i = 0; i < blockHashes.Length; i++)
+            {
+                batchRequest.BatchItems.Add(CreateBatchItem(blockHashes[i], i));
+            }
+
+            var response = await Client.SendBatchRequestAsync(batchRequest);
+            return response.BatchItems.Select(x => ((RpcRequestResponseBatchItem<EthGetBlockWithTransactionsByHash, BlockWithTransactions>)x).Response).ToList();
+
+        }
+#endif
 
         public RpcRequest BuildRequest(string blockHash, object id = null)
         {
@@ -165,6 +186,26 @@ namespace Nethereum.RPC.Eth.Blocks
             if (blockHash == null) throw new ArgumentNullException(nameof(blockHash));
             return base.SendRequestAsync(id, blockHash.EnsureHexPrefix(), false);
         }
+
+        public RpcRequestResponseBatchItem<EthGetBlockWithTransactionsHashesByHash, BlockWithTransactionHashes> CreateBatchItem(string blockHash, object id)
+        {
+            return new RpcRequestResponseBatchItem<EthGetBlockWithTransactionsHashesByHash, BlockWithTransactionHashes>(this, BuildRequest(blockHash, id));
+        }
+
+#if !DOTNET35
+        public async Task<List<BlockWithTransactionHashes>> SendBatchRequestAsync(params string[] blockHashes)
+        {
+            var batchRequest = new RpcRequestResponseBatch();
+            for (int i = 0; i < blockHashes.Length; i++)
+            {
+                batchRequest.BatchItems.Add(CreateBatchItem(blockHashes[i], i));
+            }
+
+            var response = await Client.SendBatchRequestAsync(batchRequest);
+            return response.BatchItems.Select(x => ((RpcRequestResponseBatchItem<EthGetBlockWithTransactionsHashesByHash, BlockWithTransactionHashes>)x).Response).ToList();
+
+        }
+#endif
 
         public RpcRequest BuildRequest(string blockHash, object id = null)
         {

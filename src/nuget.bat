@@ -171,14 +171,46 @@ cd Nethereum.EVM
 CALL :restorepack
 cd ..
 
+cd Nethereum.Merkle
+CALL :restorepack
+cd ..
+
+cd Nethereum.Merkle.Patricia
+CALL :restorepack
+cd ..
+
+cd Nethereum.RPC.Extensions
+CALL :restorepack
+cd ..
+
+cd Nethereum.EVM.Contracts
+CALL :restorepack
+cd ..
+
+cd Nethereum.DataServices
+CALL :restorepack
+cd ..
+
+cd Nethereum.WalletConnect
+CALL :restorepack
+cd ..
+
+cd Nethereum.Mud
+CALL :restorepack
+cd ..
+
+cd Nethereum.Mud.Contracts
+CALL :restorepack
+cd ..
+
 setlocal
 set DIR=%~dp0
-set OUTPUTDIR=%~dp0\packages
+set OUTPUTDIR=%~dp0packages\
 for /R %DIR% %%a in (*.nupkg) do xcopy "%%a" "%OUTPUTDIR%"
-xcopy *.nupkg packages /s /y
+xcopy *.nupkg packages /y /s
 
 for /R %DIR% %%a in (*.snupkg) do xcopy "%%a" "%OUTPUTDIR%"
-xcopy *.snupkg packages /s /y
+xcopy *.snupkg packages /y /s
 
 EXIT /B %ERRORLEVEL%
 

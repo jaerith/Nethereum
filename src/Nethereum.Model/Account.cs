@@ -1,11 +1,26 @@
-﻿using System.Numerics;
+﻿using Nethereum.Util;
+using Nethereum.Util.HashProviders;
+using System.Numerics;
 
 namespace Nethereum.Model
 {
+    public class AccountStorage
+    {
+        public static byte[] EncodeKeyForStorage(byte[] key, Sha3KeccackHashProvider sha3Provider)
+        {
+            var keyEncoded = RLP.RLP.EncodeElement(key).PadTo32Bytes();
+            var hashedKeyEncoded = sha3Provider.ComputeHash(keyEncoded);
+            return hashedKeyEncoded;
+        }
+
+        public static byte[] EncodeValueForStorage(byte[] value)
+        {
+            var valueEncoded = RLP.RLP.EncodeElement(value);
+            return valueEncoded;
+        }
+    }
     public class Account
     {
-
-        //TODO: https://github.com/ethereum/EIPs/issues/1186
 
         /// <summary>
         /// YP: 4.1

@@ -11,13 +11,14 @@
 	  <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+	 <ProjectReference Condition="'$(TargetFramework)' != 'net35'" Include="..\Nethereum.Metamask\Nethereum.Metamask.csproj" />
     <ProjectReference Include="..\Nethereum.Unity\Nethereum.Unity.csproj" />
   </ItemGroup>
 
 
   <ItemGroup>
     <Reference Include="UnityEngine">
-      <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.9f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>C:\Program Files\Unity\Hub\Editor\2022.3.21f1\Editor\Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -9,11 +9,15 @@ using Nethereum.Contracts.Standards.ERC1155;
 using Nethereum.Contracts.Standards.ERC1271;
 using Nethereum.Contracts.Standards.ERC20;
 using Nethereum.Contracts.Standards.ERC721;
-using Nethereum.Contracts.Standards.ProofOfHumanity;
+using Nethereum.Contracts.Standards.ERC2535Diamond;
 using Nethereum.JsonRpc.Client;
 using Nethereum.RPC;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.RPC.TransactionManagers;
+using Nethereum.Contracts.Identity.ProofOfHumanity;
+using Nethereum.Contracts.Create2Deployment;
+using Nethereum.Contracts.Standards.ERC6492;
+using Nethereum.Contracts.Standards.ERC165;
 
 namespace Nethereum.Contracts.Services
 {
@@ -27,8 +31,12 @@ namespace Nethereum.Contracts.Services
             ERC20 = new ERC20Service(this);
             ERC1155 = new ERC1155Service(this);
             ERC1271 = new ERC1271Service(this);
+            ERC2535Diamond = new ERC2535DiamondService(this);
             ProofOfHumanity = new ProofOfHumanityService(this);
+            ERC6492 = new ERC6492Service(this);
+            ERC165 = new ERC165SupportsInterfaceService(this);
 
+            Create2DeterministicDeploymentProxyService = new Create2DeterministicDeploymentProxyService(this);
 #endif
         }
 
@@ -101,10 +109,25 @@ namespace Nethereum.Contracts.Services
         }
 
         /// <summary>
+        /// Multicall using rpc batch
+        /// </summary>
+        public MultiQueryBatchRpcHandler GetMultiQueryBatchRpcHandler()
+        {
+            return new MultiQueryBatchRpcHandler(Client, TransactionManager?.Account?.Address,
+                DefaultBlock);
+        }
+
+        /// <summary>
         /// ERC20 Standard Token Service to interact with smart contracts compliant with the standard interface
         /// https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
         /// </summary>
         public ERC20Service ERC20 { get; private set; }
+
+        /// <summary>
+        /// ERC20 Standard Token Service to interact with smart contracts compliant with the standard interface
+        /// https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
+        /// </summary>
+        public ERC20Service StandardTokenERC20 => ERC20;
 
         /// <summary>
         /// ERC721 NFT - Non Fungible Token Standard Service to interact with smart contracts compliant with the standard interface
@@ -113,10 +136,25 @@ namespace Nethereum.Contracts.Services
         public ERC721Service ERC721 { get; private set; }
 
         /// <summary>
+        /// ERC721 NFT - Non Fungible Token Standard Service to interact with smart contracts compliant with the standard interface
+        /// https://ethereum.org/en/developers/docs/standards/tokens/erc-721
+        /// </summary>
+        public ERC721Service NonFungibleTokenERC721 => ERC721;
+
+        /// <summary>
         /// ERC1155 Multi token standard Service to interact with smart contracts compliant with the standard interface
         /// https://ethereum.org/en/developers/docs/standards/tokens/erc-1155/
         /// </summary>
         public ERC1155Service ERC1155 { get; private set; }
+
+        /// <summary>
+        /// ERC1155 Multi token standard Service to interact with smart contracts compliant with the standard interface
+        /// https://ethereum.org/en/developers/docs/standards/tokens/erc-1155/
+        /// </summary>
+        /// <remarks>
+        /// This is an alias to ERC1155
+        /// </remarks>
+        public ERC1155Service MultiTokenERC1155 => ERC1155;
 
         /// <summary>
         /// ERC1271: Standard Signature Validation Method for Contracts, Service to interact with smart contracts compliant with the standard interface
@@ -126,19 +164,74 @@ namespace Nethereum.Contracts.Services
         public ERC1271Service ERC1271 { get; private set; }
 
         /// <summary>
-        /// Service to interact with the Proof of Humanity registry smart contract
+        /// ERC1271: Standard Signature Validation Method for Contracts, Service to interact with smart contracts compliant with the standard interface
+        /// This enables to validate if a signature is valid for a smart contract
+        /// https://eips.ethereum.org/EIPS/eip-1271
+        /// </summary>
+        /// <remarks>
+        /// This is an alias to ERC1271
+        /// </remarks>
+        public ERC1271Service SignatureValidationContractERC1271 => ERC1271;
+
+        /// <summary>
+        /// ERC6492: Signature Validation for Predeploy Contracts  
+        /// A way to verify a signature when the account is a smart contract that has not been deployed yet
+        /// https://eips.ethereum.org/EIPS/eip-6492
+        /// </summary>
+        /// <remarks>
+        /// This is an alias to ERC6492
+        /// </remarks>
+        public ERC6492Service SignatureValidationPredeployContractERC6492 => ERC6492;
+       
+        /// <summary>
+        /// ERC6492: Signature Validation for Predeploy Contracts  
+        /// A way to verify a signature when the account is a smart contract that has not been deployed yet
+        /// https://eips.ethereum.org/EIPS/eip-6492
+        /// </summary>
+        /// <remarks>
+        /// This is an alias to ERC6492
+        /// </remarks>
+        public ERC6492Service ERC6492  { get; private set; }
+
+        /// <summary>
+        /// ERC165: Standard Interface Detection, Service to interact with smart contracts compliant with the standard interface
+        /// https://eips.ethereum.org/EIPS/eip-165
+        /// </summary>
+        public ERC165SupportsInterfaceService ERC165 { get; }
+
+        /// <summary>
+        /// ERC165: Standard Interface Detection, Service to interact with smart contracts compliant with the standard interface
+        /// https://eips.ethereum.org/EIPS/eip-165
+        /// </summary>
+        /// <remarks>
+        /// This is an alias to ERC165
+        /// </remarks>
+        public ERC165SupportsInterfaceService SupportsInterfaceServiceERC165 => ERC165;
+
+
+        /// <summary>
+        ///ERC-2535: Diamonds, Multi-Facet Proxy  
+        ///Create modular smart contract systems that can be extended after deployment.
+        /// https://eips.ethereum.org/EIPS/eip-2535
+        /// </summary>
+        public ERC2535DiamondService ERC2535Diamond { get; private set; }
+
+        /// <summary>
+        /// Service to interact with the Identity Proof of Humanity registry smart contract
         /// </summary>
         public ProofOfHumanityService ProofOfHumanity { get; private set; }
 
-        public ENSService GetEnsService(string ensRegistryAddress = CommonAddresses.ENS_REGISTRY_ADDRESS)
+        public ENSService GetEnsService(string ensRegistryAddress = CommonAddresses.ENS_REGISTRY_ADDRESS, IEnsCCIPService ensCCIPService = null)
         {
-            return new ENSService(this, ensRegistryAddress);
+            return new ENSService(this, ensRegistryAddress, ensCCIPService);
         }
 
         public EthTLSService GetEnsEthTlsService(string ensRegistryAddress = CommonAddresses.ENS_REGISTRY_ADDRESS)
         {
             return new EthTLSService(this, ensRegistryAddress);
         }
+
+        public Create2DeterministicDeploymentProxyService Create2DeterministicDeploymentProxyService { get; private set; }
 
         public IEthGetContractTransactionErrorReason GetContractTransactionErrorReason { get; }
 

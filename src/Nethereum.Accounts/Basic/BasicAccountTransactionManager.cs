@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Hex.HexTypes;
 using Nethereum.JsonRpc.Client;
+using Nethereum.Model;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.RPC.TransactionManagers;
@@ -17,12 +18,14 @@ namespace Nethereum.Web3.Accounts.Basic
         {
             Account = account;
             Client = client;
+            TransactionVerificationAndRecovery = new TransactionVerificationAndRecoveryImp();
         }
 
         public BasicAccountTransactionManager(IClient client, string accountAddress)
         {
             Account = new BasicAccount(accountAddress, this);
             Client = client;
+            TransactionVerificationAndRecovery = new TransactionVerificationAndRecoveryImp();
         }
 
         public BasicAccountTransactionManager(string accountAddress) : this(null, accountAddress

@@ -23,10 +23,6 @@ cd Nethereum.Web3
 CALL :build
 cd ..
 
-cd Nethereum.StandardToken*
-CALL :build
-cd ..
-
 cd Nethereum.JsonRpc.IpcClient*
 CALL :build
 cd ..
@@ -114,6 +110,39 @@ cd..
 cd Nethereum.Optimism
 CALL :build
 cd ..
+
+cd Nethereum.UI
+CALL :build
+cd ..
+
+cd Nethereum.EVM
+CALL :build
+cd ..
+
+cd Nethereum.Merkle
+CALL :build
+cd ..
+
+cd Nethereum.Merkle.Patricia
+CALL :build
+cd ..
+
+cd Nethereum.Metamask
+CALL :build
+cd ..
+
+cd Nethereum.Model
+CALL :build
+cd ..
+
+cd Nethereum.Mud
+CALL :build
+cd ..
+
+cd Nethereum.Mud.Contracts
+CALL :build
+cd ..
+
 
 EXIT /B %ERRORLEVEL%
 
